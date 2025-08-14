@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
-    const message = messages.at(-1).contect;
+    const message = messages.at(-1).content;
 
     const prompt = PromptTemplate.fromTemplate(" {message} ");
 
@@ -21,10 +21,10 @@ export async function POST(req: Request) {
     const parser = new HttpResponseOutputParser();
     const chain = prompt.pipe(model).pipe(parser);
 
-    const steam = await chain.stream({ message })
+    const stream = await chain.stream({ message })
 
     return new StreamingTextResponse(
-      steam.pipeThrough(createStreamDataTransformer()),
+      stream.pipeThrough(createStreamDataTransformer()),
     );
   } catch (e: any) {
     return Response.json({ erros: e.message }, { status: 500 });
