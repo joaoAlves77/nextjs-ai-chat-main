@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@langchain/core": "^0.3.70",
+    "@langchain/langgraph": "^0.4.4",
     "@langchain/openai": "^0.6.7",
     "@radix-ui/react-slot": "^1.0.2",
     "ai": "^3.0.23",

@@ -7,6 +7,13 @@ import { useRef, useEffect } from 'react'
 
 export function Chat() {
     const { messages, input, handleInputChange, handleSubmit } = useChat();
+    useChat({
+      api: '/api/ex1',
+      onError: (e) => {
+        console.log(e);
+      }
+    })
+
     const chatParent = useRef<HTMLUListElement>(null)
 
     useEffect(() => {
