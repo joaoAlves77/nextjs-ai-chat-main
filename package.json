@@ -9,10 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@langchain/openai": "^0.6.7",
     "@radix-ui/react-slot": "^1.0.2",
     "ai": "^3.0.23",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "langchain": "^0.3.30",
     "lucide-react": "^0.370.0",
     "next": "14.2.1",
     "openai": "^4.37.1",
