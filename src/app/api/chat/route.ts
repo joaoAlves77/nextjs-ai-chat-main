@@ -6,7 +6,8 @@ import { OpenAIStream, StreamingTextResponse } from 'ai';
 export const runtime = 'edge';
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY!,
+    apiKey: process.env.GROQ_API_KEY!,
+    baseURL: 'https://api.groq.com/openai/v1',
 });
 
 export async function POST(req: Request) {
@@ -15,9 +16,15 @@ export async function POST(req: Request) {
 
     // Request the OpenAI API for the response based on the prompt
     const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'openai/gpt-oss-120b',
         stream: true,
-        messages: messages,
+        messages: [
+            {
+                role: 'system',
+                content: 'Você é um assistente prestativo, cordial e objetivo. Responda em português de forma clara, organizada e bem formatada em Markdown (usando tópicos, títulos e negritos de forma elegante). Evite introduções longas desnecessárias.',
+            },
+            ...messages,
+        ],
     });
 
     // Convert the response into a friendly text-stream

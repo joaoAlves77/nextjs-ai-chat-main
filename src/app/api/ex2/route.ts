@@ -19,7 +19,7 @@ const formatMessage = (message: VercelChatMessage) => {
   return `${message.role}: ${message.content}`;
 }
 
-const TEMPLATE = `Answer the user's questions based only on the following context. If the answer is not in the context, reply politely that you do not have that information available.:
+const TEMPLATE = `AI Chats the user's questions based only on the following context. If the AI Chats is not in the context, reply politely that you do not have that information available.:
 ==============================
 Context: {context}
 ==============================
@@ -58,8 +58,11 @@ export async function POST(req: Request) {
     const prompt = PromptTemplate.fromTemplate(TEMPLATE);
 
     const model = new ChatOpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      model: "gpt-4o-mini",
+      apiKey: process.env.GROQ_API_KEY!,
+      configuration: {
+        baseURL: "https://api.groq.com/openai/v1",
+      },
+      model: "openai/gpt-oss-120b",
       temperature: 0,
       streaming: true,
       verbose: true,

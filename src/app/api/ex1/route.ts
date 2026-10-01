@@ -13,8 +13,11 @@ export async function POST(req: Request) {
     const prompt = PromptTemplate.fromTemplate(" {message} ");
 
     const model = new ChatOpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      model: "gpt-4o-mini",
+      apiKey: process.env.GROQ_API_KEY!,
+      configuration: {
+        baseURL: "https://api.groq.com/openai/v1",
+      },
+      model: "openai/gpt-oss-120b",
       temperature: 0.8,
     });
 
