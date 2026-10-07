@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Create Next App"
+  title: "Chat com IA em streaming usando Next.js, Vercel AI SDK, LangChain e Groq
 };
 
 export default function RootLayout({
