@@ -7,9 +7,9 @@ import { useRef, useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Bot, User, Send, Sparkles, ImagePlus, X } from 'lucide-react'
-import { decodeUserContent, encodeUserContent, extractEmbeddedImages, imagesFromAnnotations } from '@/lib/chat-media'
+import { decodeUserContent, encodeUserContent } from '@/lib/chat-media'
 
-const MAX_IMAGES = 4
+const MAX_IMAGES = 3
 const MAX_EDGE = 1280
 
 type PendingImage = {
@@ -38,22 +38,19 @@ function ImageStack({ urls, light }: { urls: string[]; light?: boolean }) {
     return (
         <div className={`grid gap-2 ${urls.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {urls.map((url, index) => (
-                <a key={`${url.slice(0, 32)}-${index}`} href={url} target="_blank" rel="noreferrer">
-                    <img
-                        src={url}
-                        alt={`Imagem ${index + 1}`}
-                        className={`max-h-72 w-full rounded-xl object-contain ${light ? 'bg-black/10' : 'bg-background'}`}
-                    />
-                </a>
+                <img
+                    key={`${index}-${url.length}`}
+                    src={url}
+                    alt={`Foto ${index + 1}`}
+                    className={`max-h-72 w-full rounded-xl object-contain ${light ? 'bg-black/10' : 'bg-background'}`}
+                />
             ))}
         </div>
     )
 }
 
 export function Chat() {
-    const { messages, input, handleInputChange, append, setInput, isLoading, error } = useChat({
-        sendExtraMessageFields: true,
-    });
+    const { messages, input, handleInputChange, append, setInput, isLoading, error } = useChat();
     const chatParent = useRef<HTMLDivElement>(null)
     const fileInput = useRef<HTMLInputElement>(null)
     const [pendingImages, setPendingImages] = useState<PendingImage[]>([])
@@ -76,7 +73,7 @@ export function Chat() {
 
         const room = MAX_IMAGES - pendingImages.length
         if (room <= 0) {
-            setAttachmentError(`Você pode enviar até ${MAX_IMAGES} imagens por mensagem.`)
+            setAttachmentError(`Você pode enviar até ${MAX_IMAGES} fotos por mensagem.`)
             return
         }
 
@@ -90,7 +87,7 @@ export function Chat() {
                 ...urls.map((url) => ({ id: crypto.randomUUID(), url })),
             ])
             if (list.length > room) {
-                setAttachmentError(`Você pode enviar até ${MAX_IMAGES} imagens por mensagem.`)
+                setAttachmentError(`Você pode enviar até ${MAX_IMAGES} fotos por mensagem.`)
             }
         } catch {
             setAttachmentError('Não consegui ler essa imagem.')
@@ -123,8 +120,8 @@ export function Chat() {
                         <Sparkles className="w-5 h-5" />
                     </div>
                     <div>
-                        <h1 className="text-lg font-semibold tracking-tight">AI Assistant</h1>
-                        <p className="text-xs text-muted-foreground">Powered by Groq</p>
+                        <h1 className="text-lg font-semibold tracking-tight">Visagismo</h1>
+                        <p className="text-xs text-muted-foreground">Avaliação do rosto pela foto</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -146,9 +143,9 @@ export function Chat() {
                                 <Bot className="w-8 h-8" />
                             </div>
                             <div className="space-y-1 max-w-sm">
-                                <h3 className="font-medium text-base">Como posso ajudar você hoje?</h3>
+                                <h3 className="font-medium text-base">Envie uma foto do rosto</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    Envie uma imagem para eu analisar, peça um desenho ou faça uma pergunta em texto.
+                                    Anexe a imagem e escreva o que quer avaliar: corte, maquiagem, óculos ou cores.
                                 </p>
                             </div>
                         </div>
@@ -156,10 +153,8 @@ export function Chat() {
                         messages.map((message) => {
                             const isUser = message.role === 'user'
                             const decoded = isUser ? decodeUserContent(message.content) : null
-                            const embedded = isUser ? null : extractEmbeddedImages(message.content)
-                            const userImages = decoded?.images ?? []
-                            const assistantImages = isUser ? [] : [...imagesFromAnnotations(message.annotations), ...(embedded?.images ?? [])]
-                            const text = decoded?.text ?? embedded?.text ?? message.content
+                            const text = decoded?.text ?? message.content
+                            const images = decoded?.images ?? []
 
                             return (
                                 <div
@@ -179,19 +174,12 @@ export function Chat() {
                                                 : 'bg-muted/70 text-foreground border border-border/50 rounded-tl-sm'
                                         }`}
                                     >
-                                        <ImageStack urls={isUser ? userImages : assistantImages} light={isUser} />
+                                        <ImageStack urls={images} light={isUser} />
                                         {isUser ? (
                                             text ? <p className="whitespace-pre-wrap">{text}</p> : null
                                         ) : (
                                             <div className="prose prose-sm dark:prose-invert max-w-none break-words [&>p]:mb-3 [&>p:last-child]:mb-0 [&>ul]:my-2 [&>ol]:my-2 [&>li]:my-0.5">
-                                                <ReactMarkdown
-                                                    remarkPlugins={[remarkGfm]}
-                                                    components={{
-                                                        img: ({ src, alt }) => src ? (
-                                                            <img src={src} alt={alt ?? 'Imagem'} className="my-2 max-h-80 rounded-xl" />
-                                                        ) : null,
-                                                    }}
-                                                >
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                                     {text}
                                                 </ReactMarkdown>
                                             </div>
@@ -274,7 +262,7 @@ export function Chat() {
                             type="button"
                             variant="outline"
                             className="h-11 w-11 rounded-xl shrink-0"
-                            aria-label="Anexar imagem"
+                            aria-label="Anexar foto"
                             disabled={isLoading || isCompressing}
                             onClick={() => fileInput.current?.click()}
                         >
@@ -282,7 +270,7 @@ export function Chat() {
                         </Button>
                         <Input
                             className="flex-1 h-11 px-4 rounded-xl border-input bg-muted/30 focus-visible:ring-1"
-                            placeholder="Digite sua pergunta ou peça uma imagem..."
+                            placeholder="Diga o que quer avaliar na foto..."
                             type="text"
                             value={input}
                             onChange={handleInputChange}
