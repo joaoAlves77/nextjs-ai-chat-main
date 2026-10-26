@@ -92,7 +92,7 @@ export function extractEmbeddedImages(text: string): { text: string; images: str
 function svgToDataUrl(svg: string) {
     const bytes = new TextEncoder().encode(svg);
     let binary = "";
-    for (const byte of bytes) binary += String.fromCharCode(byte);
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
     return `data:image/svg+xml;base64,${btoa(binary)}`;
 }
 
